@@ -12,7 +12,7 @@ A simple, lightweight CLI tool to securely store and retrieve your API keys. Nev
 ## Installation
 
 ```bash
-git clone https://github.com/yourusername/keyholder.git
+git clone https://github.com/jordialt/keyholder.git
 cd keyholder
 chmod +x install.sh
 ./install.sh

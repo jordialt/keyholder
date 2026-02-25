@@ -2,7 +2,10 @@
 venv/
 
 # User's local API key storage (never commit this!)
-~/.keyholder.json
+.keyholder.json
+
+# Generated wrapper script (created by install.sh)
+keyholder_wrapper.sh
 
 # Python bytecode
 __pycache__/
