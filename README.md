@@ -1,73 +1,53 @@
-# 🔑 Keyholder
+# 🔐 Keyholder
 
-A simple, lightweight CLI tool to securely store and retrieve your API keys. Never go hunting through files again — just ask for a key and it's on your clipboard, ready to paste.
-
-## Features
-
-- **Store** API keys locally with strict file permissions (`600`)
-- **Retrieve & copy** keys directly to your clipboard
-- **List** all your configured services
-- **Remove** keys you no longer need
+A minimal CLI to store and retrieve API keys using your operating system's secure keyring (GNOME Keyring, KWallet, macOS Keychain).
 
 ## Installation
 
 ```bash
-git clone https://github.com/jordialt/keyholder.git
 cd keyholder
-chmod +x install.sh
 ./install.sh
 ```
 
-> [!NOTE]
-> The installer creates a Python virtual environment in the project folder and links the `keyholder` command to `~/.local/bin/`. Make sure this directory is in your `$PATH`.
->
-> You can check by running `echo $PATH`. If it's missing, add this to your `~/.bashrc` or `~/.zshrc`:
-> ```bash
-> export PATH="$HOME/.local/bin:$PATH"
-> ```
+This creates a virtual environment, installs dependencies (`keyring`, `pyperclip`), and symlinks the `keyholder` command to `~/.local/bin`.
 
 ## Usage
 
 ```bash
-# Save an API key
-keyholder set <service> <key>
+# Save a key
+keyholder set openai sk-abc123
 
-# Get a key (copies to clipboard automatically)
-keyholder get <service>
+# Retrieve a key (copies to clipboard, auto-clears after 30s)
+keyholder get openai
 
-# List all saved services
+# Retrieve with custom clipboard timeout (in seconds, 0 = no auto-clear)
+keyholder get openai --timeout 10
+
+# List stored key names
 keyholder list
 
 # Remove a key
-keyholder remove <service>
+keyholder remove openai
 ```
 
-### Example
+## How it works
 
-```bash
-keyholder set elevenlabs sk-my-elevenlabs-key
-keyholder set openai sk-my-openai-key
-
-keyholder list
-# Saved service keys:
-#   - elevenlabs
-#   - openai
-
-keyholder get elevenlabs
-# Key for 'elevenlabs' has been copied to your clipboard.
-```
-
-## Storage
-
-Keys are saved in `~/.keyholder.json` with `600` permissions (readable only by your user). This file is excluded from the repo via `.gitignore`.
-
-## Running Tests
-
-```bash
-venv/bin/python -m unittest test_main.py
-```
+| Concern | Mechanism |
+|---------|-----------|
+| Secret storage | OS keyring via the `keyring` Python library (service name: `keyholder`) |
+| Key listing | Lightweight index file at `~/.keyholder_index` (names only, no secrets) |
+| Clipboard safety | After `get`, clipboard is overwritten with `""` after a configurable timeout |
+| Migration | If `~/.keyholder.json` is found on first run, keys are imported into the keyring and the file is deleted |
 
 ## Requirements
 
 - Python 3.8+
-- `pyperclip` (installed automatically by `install.sh`)
+- A supported keyring backend (GNOME Keyring, KWallet, macOS Keychain)
+- `xclip` / `xsel` / `pbcopy` for clipboard support
+
+## Running Tests
+
+```bash
+source venv/bin/activate
+python -m pytest test_main.py -v
+```
